@@ -1,0 +1,60 @@
+What keyword is used to declare a variable in Rust?,The `let` keyword is used to declare a variable.
+"By default, are variables in Rust mutable or immutable?","By default, variables in Rust are immutable."
+"To declare a variable that can be reassigned, you must use the _____ keyword after `let`.",`mut`
+What is the syntax for explicitly annotating the type of a variable in Rust?,"The variable name is followed by a colon and the type, for example: `let x: u32 = 10;`."
+"If an integer type is not explicitly specified, what does Rust default to?","Rust defaults to `i32`, a 32-bit signed integer."
+What happens if you try to reassign a value to an immutable variable in Rust?,"The compiler will produce a compile-time error, stating you cannot assign twice to an immutable variable."
+"In Rust, what does shadowing a variable allow you to do that modifying a `mut` variable does not?",Shadowing allows you to change the type of the variable while reusing the same name.
+"How do you declare a constant in Rust, and what is required for its type?","You use the `const` keyword, and the type of the value must always be annotated."
+What are Rust's four primary scalar data types?,"Integers, floating-point numbers, booleans, and characters."
+"In Rust's integer types, what do the prefixes `i` and `u` signify?","`i` signifies a signed integer (can be negative), and `u` signifies an unsigned integer (non-negative)."
+What do the `isize` and `usize` integer types depend on?,"They depend on the architecture of the computer the program is running on (e.g., 64-bit or 32-bit)."
+"If a floating-point type is not explicitly specified, what does Rust default to?","Rust defaults to `f64`, a 64-bit (double-precision) floating-point number."
+What are the two possible values for the `bool` type in Rust?,The `bool` type can be either `true` or `false`.
+"How are `char` literals specified in Rust, and what is their size?","They are specified with single quotes (e.g., `'a'`) and are four bytes in size."
+What kind of values can Rust's `char` type represent beyond standard ASCII?,"It can represent any Unicode scalar value, including accented letters, emojis, and characters from other languages."
+What is a tuple in Rust?,A tuple is a compound type that groups together a number of values with a variety of types into one compound value.
+"Once a tuple is declared in Rust, can its size or length be changed?","No, tuples have a fixed length and cannot grow or shrink in size."
+What is the process of breaking a tuple into its individual parts called?,Destructuring.
+How can you access an individual element of a tuple directly without destructuring?,"You can use a period `.` followed by the zero-based index of the element (e.g., `my_tuple.0`)."
+"What is the name for a tuple with no values, written as `()`?",It is called the unit type or unit tuple.
+What is the primary constraint for all elements within a Rust array?,Every element of an array must have the same type.
+What is the syntax for declaring an array in Rust that specifies both the element type and the number of elements?,"`let a: [i32; 5] = [1, 2, 3, 4, 5];` where `i32` is the type and `5` is the length."
+How can you initialize an array in Rust to contain the same value for every element?,"By specifying the initial value, followed by a semicolon, then the length (e.g., `let a = [3; 5];`)."
+How do you access elements in a Rust array?,"Using square bracket notation with a zero-based index (e.g., `my_array[0]`)."
+What happens at runtime if you attempt to access an array element using an index that is out of bounds?,The program will panic and exit with an error.
+"What is a vector in Rust, and how does it differ from an array?","A vector is a resizable collection type, unlike arrays which have a fixed size."
+"What is one way to create a new, empty vector?","Using `Vec::new()`, which requires a type annotation (e.g., `let v: Vec<i32> = Vec::new();`)."
+The _____ macro provides a convenient way to create a new vector with initial values.,"`vec!` (e.g., `let v = vec![1, 2, 3];`)"
+Which method is used to add a new element to the end of a vector?,The `push()` method.
+"What does the `get()` method for vectors return, providing a way to access elements without risking a panic?","It returns an `Option<T>`, which will be `Some(&element)` if the index is valid or `None` if it is out of bounds."
+What does the `pop()` method do on a vector?,It removes the last element from the vector and returns it wrapped in an `Option`.
+"In Rust, are parentheses required around the condition in an `if` statement?","No, parentheses are not required around the condition."
+The condition for an `if` expression in Rust must evaluate to a value of type _____.,`bool`
+What are the three kinds of loops available in Rust?,"`loop`, `while`, and `for`."
+Which Rust loop construct creates an infinite loop that runs until you explicitly tell it to stop?,The `loop` keyword.
+How do you break out of a `loop` in Rust?,Using the `break` keyword.
+How does a `for` loop in Rust typically iterate over a collection like an array?,"It iterates through each element in the collection (e.g., `for element in a`)."
+"When using a `for` loop with a range, such as `for number in 0..10`, which numbers are included in the iteration?","The numbers from 0 up to, but not including, 10 (i.e., 0 through 9)."
+What keyword is used to define a function in Rust?,The `fn` keyword.
+"In a Rust function signature, is it mandatory to declare the type of each parameter?","Yes, you must declare the type of each function parameter."
+What is the syntax used in a function signature to declare the return type?,"An arrow `->` followed by the type (e.g., `fn my_func() -> i32`)."
+What is the primary difference between a statement and an expression in Rust?,"Statements are instructions that perform an action but do not return a value, while expressions evaluate to a resultant value."
+How can a function in Rust return a value without using the `return` keyword?,The value of the final expression in the function body is automatically returned.
+What happens to the return value of a function if a semicolon is added to the final expression?,"It becomes a statement, and the function will implicitly return the unit type `()`."
+What is the purpose of an `enum` in Rust?,An enum (enumeration) allows you to define a type by listing its possible variants.
+"In the context of a Rust `enum`, each of the possible values listed in the definition is called a _____.",variant
+Can enum variants in Rust hold associated data?,"Yes, variants can have associated data of different types and amounts (e.g., `enum Message { Write(String), };`)."
+The `match` control flow operator allows you to compare a value against a series of _____.,patterns
+What does it mean for `match` arms in Rust to be exhaustive?,It means you must cover every single possible value of the type being matched.
+What pattern can be used as the last arm in a `match` expression to catch any value not specified in the preceding arms?,"The wildcard pattern, which is a single underscore `_`."
+What concept in other languages is the `Option` enum in Rust designed to handle safely?,It is designed to handle null or nonexistent values.
+What are the two variants of the `Option<T>` enum?,"`Some(T)`, which holds a value of type `T`, and `None`, which signifies no value."
+"What is the purpose of the `Result<T, E>` enum in Rust?","It is used for error handling, representing either a success (`Ok`) or a failure (`Err`)."
+"What are the two variants of the `Result<T, E>` enum?","`Ok(T)`, which contains a success value of type `T`, and `Err(E)`, which contains an error value of type `E`."
+What will happen if you call the `.unwrap()` method on an `Option` that has the value `None`?,The program will panic.
+What will happen if you call the `.unwrap()` method on a `Result` that has an `Err` value?,The program will panic.
+What boolean-returning method can you call on an `Option` to check if it contains a value?,The `is_some()` method.
+What boolean-returning method can you call on a `Result` to check if it represents a successful operation?,The `is_ok()` method.
+How does `unwrap_or()` differ from `unwrap()` for an `Option` or `Result`?,"`unwrap_or()` returns the contained value if it exists, otherwise it returns a default value that you provide instead of panicking."
+What is the result of using the `or` operator (`|`) within a `match` arm pattern?,"It allows a single block of code to run for multiple patterns (e.g., `Some(3) | Some(4) => ...`)."
