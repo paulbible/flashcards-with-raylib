@@ -101,20 +101,16 @@ fn load_flashcards(filename: &str) -> Result<Vec<Flashcard>, std::io::Error> {
 
     for line in reader.lines() {
         let line = line?;
-        
+
         if let Some((question, answer)) = parse_csv_line(&line) {
             if !question.is_empty() && !answer.is_empty() {
-                cards.push(Flashcard {
-                    question,
-                    answer,
-                });
+                cards.push(Flashcard { question, answer });
             }
         }
     }
 
     Ok(cards)
 }
-
 
 fn wrap_text(text: &str, max_width: i32, font_size: i32) -> Vec<String> {
     let words: Vec<&str> = text.split_whitespace().collect();
@@ -175,9 +171,7 @@ fn main() {
     let font_size: f32 = 40.0;
     let font_size_smaller: f32 = 35.0;
 
-
-
-     while !rl.window_should_close() {
+    while !rl.window_should_close() {
         // Input handling
         if rl.is_key_pressed(KeyboardKey::KEY_SPACE) || rl.is_key_pressed(KeyboardKey::KEY_UP) {
             game.flip();
@@ -220,11 +214,11 @@ fn main() {
 
         for (i, line) in wrapped_lines.iter().enumerate() {
             let y = start_y as f32 + (i as f32 * line_height as f32);
-            
+
             if let Some(ref font) = custom_font {
-                // Approximate text width for custom font
-                let approx_width = (line.len() as f32 * font_size_smaller * 0.5) as f32;
-                let x = 400.0 - approx_width / 2.0;
+                // Get the text width for custom font
+                let text_dimensions = font.measure_text(line.as_str(), font_size, 0.0);
+                let x = 400.0 - text_dimensions.x / 2.0;
                 d.draw_text_ex(font, line, Vector2::new(x, y), font_size, 1.0, text_color);
             } else {
                 let text_width = d.measure_text(line, 28);
@@ -234,30 +228,79 @@ fn main() {
         }
 
         // Draw status indicator
-        let status_text = if game.is_flipped { "ANSWER" } else { "QUESTION" };
-        if let Some(ref font) = custom_font {
-            d.draw_text_ex(font, status_text, Vector2::new(350.0, 470.0), font_size_smaller, 1.0, Color::from_hex("95A5A6").unwrap());
+        let status_text = if game.is_flipped {
+            "ANSWER"
         } else {
-            d.draw_text(status_text, 350, 470, 20, Color::from_hex("95A5A6").unwrap());
+            "QUESTION"
+        };
+        if let Some(ref font) = custom_font {
+            let w = font.measure_text(status_text, font_size, 0.0);
+
+            let x = 400.0 - w.x / 2.0;
+            d.draw_text_ex(
+                font,
+                status_text,
+                Vector2::new(x, 470.0),
+                font_size_smaller,
+                1.0,
+                Color::from_hex("95A5A6").unwrap(),
+            );
+        } else {
+            d.draw_text(
+                status_text,
+                350,
+                470,
+                20,
+                Color::from_hex("95A5A6").unwrap(),
+            );
         }
 
         // Draw card counter
         let counter = format!("Card {} / {}", game.current_index + 1, game.cards.len());
         if let Some(ref font) = custom_font {
-            d.draw_text_ex(font, &counter, Vector2::new(350.0, 500.0), font_size_smaller, 1.0, Color::from_hex("95A5A6").unwrap());
+            let text_dimensions = font.measure_text(counter.as_str(), font_size, 0.0);
+
+            let x = 400.0 - text_dimensions.x / 2.0;
+            d.draw_text_ex(
+                font,
+                &counter,
+                Vector2::new(x, 500.0),
+                font_size_smaller,
+                1.0,
+                Color::from_hex("95A5A6").unwrap(),
+            );
         } else {
-            d.draw_text(&counter, 350, 500, font_size_smaller as i32, Color::from_hex("95A5A6").unwrap());
+            d.draw_text(
+                &counter,
+                350,
+                500,
+                font_size_smaller as i32,
+                Color::from_hex("95A5A6").unwrap(),
+            );
         }
 
         // Draw instructions
         if let Some(ref font) = custom_font {
-            d.draw_text_ex(font, "SPACE/UP: Flip  |  LEFT/RIGHT: Navigate", Vector2::new(220.0, 550.0), font_size_smaller, 1.0, Color::from_hex("7F8C8D").unwrap());
+            let message = "SPACE/UP: Flip  |  LEFT/RIGHT: Navigate";
+            let text_dimensions: Vector2 = font.measure_text(message, font_size, 0.0);
+
+            let x = 400.0 - text_dimensions.x / 2.0;
+            d.draw_text_ex(
+                font,
+                message,
+                Vector2::new(x, 550.0),
+                font_size_smaller,
+                1.0,
+                Color::from_hex("7F8C8D").unwrap(),
+            );
         } else {
-            d.draw_text("SPACE/UP: Flip  |  LEFT/RIGHT: Navigate", 220, 550, font_size_smaller as i32, Color::from_hex("7F8C8D").unwrap());
+            d.draw_text(
+                "SPACE/UP: Flip  |  LEFT/RIGHT: Navigate",
+                220,
+                550,
+                font_size_smaller as i32,
+                Color::from_hex("7F8C8D").unwrap(),
+            );
         }
     }
 }
-
-// Add to Cargo.toml:
-// [dependencies]
-// raylib = "5.0"
