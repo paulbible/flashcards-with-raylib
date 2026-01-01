@@ -165,7 +165,7 @@ fn draw_text_centered(
         // Use custom font
         let text_dimensions = font.measure_text(text, font_size, 0.0);
         let x = center_x as f32 - text_dimensions.x / 2.0;
-        d.draw_text_ex(font, text, Vector2::new(x, y_f), font_size, 1.0, color);
+        d.draw_text_ex(font, text, Vector2::new(x, y_f), font_size, 0.0, color);
     } else {
         // Use default font
         let text_width = d.measure_text(text, font_size_i);
@@ -296,7 +296,7 @@ fn main() {
         draw_text_centered(&mut d, &custom_font, &counter, 400, 500, font_size_smaller, signifier_color);
 
         // Draw instructions
-        let message = "SPACE/UP: Flip  |  LEFT/RIGHT: Navigate";
+        let message = "SPACE/UP: Flip  |  LEFT/RIGHT: Navigate | A/D Switch Decks";
         draw_text_centered(&mut d, &custom_font, &message, 400, 550, font_size_smaller, signifier_color);
 
     }
