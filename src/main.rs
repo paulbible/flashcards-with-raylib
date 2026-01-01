@@ -2,6 +2,10 @@ use raylib::prelude::*;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
+use crate::utils::DeckManager;
+
+mod utils;
+
 #[derive(Clone)]
 struct Flashcard {
     question: String,
@@ -144,18 +148,64 @@ fn wrap_text(text: &str, max_width: i32, font_size: i32) -> Vec<String> {
     lines
 }
 
-fn main() {
-    let cards = match load_flashcards("cards.csv") {
-        Ok(cards) if !cards.is_empty() => cards,
+
+fn draw_text_centered(
+    d: &mut RaylibDrawHandle,
+    custom_font: &Option<Font>,
+    text: &str,
+    center_x: i32,
+    y: i32,
+    font_size: f32,
+    color: Color,
+) {
+    let font_size_i = font_size as i32;
+    let y_f = y as f32;
+    
+    if let Some(font) = custom_font {
+        // Use custom font
+        let text_dimensions = font.measure_text(text, font_size, 0.0);
+        let x = center_x as f32 - text_dimensions.x / 2.0;
+        d.draw_text_ex(font, text, Vector2::new(x, y_f), font_size, 1.0, color);
+    } else {
+        // Use default font
+        let text_width = d.measure_text(text, font_size_i);
+        let x = center_x - text_width / 2;
+        d.draw_text(text, x, y, font_size_i, color);
+    }
+}
+
+fn try_load_cards(filename: &str) -> Option<Vec<Flashcard>> {
+    match load_flashcards(filename) {
+        Ok(cards) if !cards.is_empty() => Some(cards),
         Ok(_) => {
             eprintln!("Error: cards.csv is empty or contains no valid flashcards");
-            return;
+            None
         }
         Err(e) => {
             eprintln!("Error loading cards.csv: {}", e);
-            return;
+            None
         }
-    };
+    }
+}
+
+fn update_decks(decks: &DeckManager, game: &mut FlashcardGame) {
+    match try_load_cards(&decks.get_current_deck_path()){
+        Some(cards) => *game = FlashcardGame::new(cards),
+        None => panic!("Failed to load cards")
+    }
+}
+
+
+fn main() {
+    let mut decks: utils::DeckManager = utils::DeckManager::new("./flashcard_decks").unwrap();
+    //let cards = match load_flashcards("cards.csv") {
+    let maybe_cards = try_load_cards(&decks.get_current_deck_path());
+    if maybe_cards.is_none() {
+        panic!("Could not load cards from folder");
+    }
+
+    let cards = maybe_cards.unwrap();
+   
 
     let mut game = FlashcardGame::new(cards);
 
@@ -171,6 +221,8 @@ fn main() {
     let font_size: f32 = 40.0;
     let font_size_smaller: f32 = 35.0;
 
+    let signifier_color = Color::from_hex("95A5A6").unwrap();
+
     while !rl.window_should_close() {
         // Input handling
         if rl.is_key_pressed(KeyboardKey::KEY_SPACE) || rl.is_key_pressed(KeyboardKey::KEY_UP) {
@@ -182,10 +234,24 @@ fn main() {
         if rl.is_key_pressed(KeyboardKey::KEY_LEFT) {
             game.prev_card();
         }
+        if rl.is_key_pressed(KeyboardKey::KEY_A) {
+            decks.prev_deck();
+            update_decks(&decks, &mut game);
+        }
+        if rl.is_key_pressed(KeyboardKey::KEY_D) {
+            decks.next_deck();
+            update_decks(&decks, &mut game);
+        }
 
         // Drawing
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::from_hex("2C3E50").unwrap());
+
+        // Draw Current Deck title.
+        let deck_title = format!("Deck: {}", decks.get_current_deck_name());
+        let y = 25.0;
+
+        draw_text_centered(&mut d, &custom_font, &deck_title, 400, 25, font_size, Color::WHITE);
 
         // Draw card background
         let card_rect = Rectangle::new(100.0, 100.0, 600.0, 350.0);
@@ -214,17 +280,7 @@ fn main() {
 
         for (i, line) in wrapped_lines.iter().enumerate() {
             let y = start_y as f32 + (i as f32 * line_height as f32);
-
-            if let Some(ref font) = custom_font {
-                // Get the text width for custom font
-                let text_dimensions = font.measure_text(line.as_str(), font_size, 0.0);
-                let x = 400.0 - text_dimensions.x / 2.0;
-                d.draw_text_ex(font, line, Vector2::new(x, y), font_size, 1.0, text_color);
-            } else {
-                let text_width = d.measure_text(line, 28);
-                let x = 400 - text_width / 2;
-                d.draw_text(line, x, y as i32, font_size as i32, text_color);
-            }
+            draw_text_centered(&mut d, &custom_font, &line, 400, y as i32, font_size, text_color);
         }
 
         // Draw status indicator
@@ -233,74 +289,15 @@ fn main() {
         } else {
             "QUESTION"
         };
-        if let Some(ref font) = custom_font {
-            let w = font.measure_text(status_text, font_size, 0.0);
-
-            let x = 400.0 - w.x / 2.0;
-            d.draw_text_ex(
-                font,
-                status_text,
-                Vector2::new(x, 470.0),
-                font_size_smaller,
-                1.0,
-                Color::from_hex("95A5A6").unwrap(),
-            );
-        } else {
-            d.draw_text(
-                status_text,
-                350,
-                470,
-                20,
-                Color::from_hex("95A5A6").unwrap(),
-            );
-        }
-
+        draw_text_centered(&mut d, &custom_font, &status_text, 400, 470, font_size_smaller, signifier_color);
+        
         // Draw card counter
         let counter = format!("Card {} / {}", game.current_index + 1, game.cards.len());
-        if let Some(ref font) = custom_font {
-            let text_dimensions = font.measure_text(counter.as_str(), font_size, 0.0);
-
-            let x = 400.0 - text_dimensions.x / 2.0;
-            d.draw_text_ex(
-                font,
-                &counter,
-                Vector2::new(x, 500.0),
-                font_size_smaller,
-                1.0,
-                Color::from_hex("95A5A6").unwrap(),
-            );
-        } else {
-            d.draw_text(
-                &counter,
-                350,
-                500,
-                font_size_smaller as i32,
-                Color::from_hex("95A5A6").unwrap(),
-            );
-        }
+        draw_text_centered(&mut d, &custom_font, &counter, 400, 500, font_size_smaller, signifier_color);
 
         // Draw instructions
-        if let Some(ref font) = custom_font {
-            let message = "SPACE/UP: Flip  |  LEFT/RIGHT: Navigate";
-            let text_dimensions: Vector2 = font.measure_text(message, font_size, 0.0);
+        let message = "SPACE/UP: Flip  |  LEFT/RIGHT: Navigate";
+        draw_text_centered(&mut d, &custom_font, &message, 400, 550, font_size_smaller, signifier_color);
 
-            let x = 400.0 - text_dimensions.x / 2.0;
-            d.draw_text_ex(
-                font,
-                message,
-                Vector2::new(x, 550.0),
-                font_size_smaller,
-                1.0,
-                Color::from_hex("7F8C8D").unwrap(),
-            );
-        } else {
-            d.draw_text(
-                "SPACE/UP: Flip  |  LEFT/RIGHT: Navigate",
-                220,
-                550,
-                font_size_smaller as i32,
-                Color::from_hex("7F8C8D").unwrap(),
-            );
-        }
     }
 }
